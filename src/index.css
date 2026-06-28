@@ -6,7 +6,7 @@
 
 :root {
   color: #000;
-  background: #fff;
+  background: #f6f7f9;
   font-family:
     system-ui,
     -apple-system,
@@ -22,7 +22,9 @@
 body {
   min-width: 320px;
   min-height: 100vh;
-  background: #fff;
+  background:
+    linear-gradient(180deg, #ffffff 0, #f6f7f9 260px),
+    #f6f7f9;
   color: #000;
 }
 
@@ -42,20 +44,26 @@ input {
 }
 
 .app-header {
-  border-bottom: 1px solid #e0e0e0;
-  padding: 1rem;
+  backdrop-filter: blur(12px);
+  background: rgb(255 255 255 / 86%);
+  border-bottom: 1px solid #e6e8ec;
+  padding: 1rem clamp(1rem, 4vw, 2rem);
+  position: sticky;
+  top: 0;
+  z-index: 5;
 }
 
 .app-title {
   display: inline-block;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 700;
+  letter-spacing: 0;
 }
 
 .container {
-  max-width: 900px;
+  max-width: 980px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 2rem 1rem;
 }
 
 .page-heading {
@@ -63,7 +71,7 @@ input {
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 h1 {
@@ -85,10 +93,19 @@ p {
   line-height: 1.5;
 }
 
+.user-count {
+  color: #5f6673;
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
+}
+
 .btn {
-  border-radius: 0;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 0.875rem;
+  font-weight: 700;
   padding: 0.5rem 1rem;
   transition:
     background 0.2s ease,
@@ -106,6 +123,7 @@ p {
   background: #000;
   border: 1px solid #000;
   color: #fff;
+  box-shadow: 0 10px 24px rgb(0 0 0 / 12%);
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -115,7 +133,7 @@ p {
 
 .btn-secondary {
   background: #fff;
-  border: 1px solid #000;
+  border: 1px solid #d8dce2;
   color: #000;
 }
 
@@ -124,12 +142,16 @@ p {
 }
 
 .user-form {
+  background: #fff;
+  border: 1px solid #e6e8ec;
+  border-radius: 8px;
+  box-shadow: 0 16px 40px rgb(26 32 44 / 8%);
   display: flex;
   flex-direction: column;
   gap: 1rem;
   max-width: 480px;
   margin-bottom: 1.5rem;
-  padding: 1rem 0;
+  padding: 1.25rem;
 }
 
 .user-form label {
@@ -142,7 +164,8 @@ p {
 }
 
 .user-form input {
-  border: 1px solid #e0e0e0;
+  border: 1px solid #d8dce2;
+  border-radius: 6px;
   font-size: 1rem;
   outline: none;
   padding: 0.5rem;
@@ -172,21 +195,33 @@ p {
 }
 
 .user-table {
+  background: #fff;
+  border: 1px solid #e6e8ec;
+  border-radius: 8px;
   border-collapse: collapse;
+  box-shadow: 0 16px 40px rgb(26 32 44 / 7%);
+  overflow: hidden;
   width: 100%;
 }
 
 .user-table th,
 .user-table td {
-  border-bottom: 1px solid #e0e0e0;
-  padding: 0.75rem;
+  border-bottom: 1px solid #eef0f3;
+  padding: 0.875rem;
   text-align: left;
   vertical-align: middle;
 }
 
 .user-table th {
-  color: #333;
+  background: #fafbfc;
+  color: #5f6673;
+  font-size: 0.8125rem;
   font-weight: 600;
+  text-transform: uppercase;
+}
+
+.user-table tbody tr:hover {
+  background: #fafbfc;
 }
 
 .name-link {
@@ -201,7 +236,10 @@ p {
 }
 
 .user-card {
-  border: 1px solid #e0e0e0;
+  background: #fff;
+  border: 1px solid #e6e8ec;
+  border-radius: 8px;
+  box-shadow: 0 12px 28px rgb(26 32 44 / 7%);
   margin-bottom: 0.75rem;
   padding: 1rem;
 }
@@ -215,8 +253,29 @@ p {
   margin-top: 1rem;
 }
 
+.row-loader {
+  align-items: center;
+  color: #5f6673;
+  display: inline-flex;
+  font-size: 0.875rem;
+  font-weight: 700;
+  gap: 0.5rem;
+}
+
+.row-loader::before {
+  animation: spin 0.7s linear infinite;
+  border: 2px solid #d8dce2;
+  border-radius: 50%;
+  border-top-color: #000;
+  content: '';
+  height: 14px;
+  width: 14px;
+}
+
 .empty-state {
-  border: 1px solid #e0e0e0;
+  background: #fff;
+  border: 1px solid #e6e8ec;
+  border-radius: 8px;
   padding: 1rem;
 }
 
@@ -238,6 +297,8 @@ p {
 .toast {
   animation: slide-in 0.2s ease;
   bottom: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 16px 40px rgb(26 32 44 / 20%);
   color: #fff;
   padding: 0.75rem 1.25rem;
   position: fixed;
@@ -262,7 +323,12 @@ p {
 }
 
 .detail {
+  background: #fff;
+  border: 1px solid #e6e8ec;
+  border-radius: 8px;
+  box-shadow: 0 16px 40px rgb(26 32 44 / 7%);
   max-width: 680px;
+  padding: 1.25rem;
 }
 
 .detail-list {

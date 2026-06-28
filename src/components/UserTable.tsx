@@ -3,12 +3,13 @@ import type { User } from '../types/User'
 
 interface UserTableProps {
   users: User[]
+  deletingUserId: number | null
   onEdit: (user: User) => void
   onDelete: (id: number) => void
 }
 
 // Renders users as a desktop table and mobile card stack.
-function UserTable({ users, onEdit, onDelete }: UserTableProps) {
+function UserTable({ users, deletingUserId, onEdit, onDelete }: UserTableProps) {
   if (users.length === 0) {
     return <p className="empty-state">No users found.</p>
   }
@@ -25,16 +26,60 @@ function UserTable({ users, onEdit, onDelete }: UserTableProps) {
           </tr>
         </thead>
         <tbody>
-          {users.map((user) => (
-            <tr key={user.id}>
-              <td>
-                <Link className="name-link" to={`/users/${user.id}`}>
-                  {user.name}
-                </Link>
-              </td>
-              <td>{user.email}</td>
-              <td>{user.phone}</td>
-              <td>
+          {users.map((user) => {
+            const isDeleting = deletingUserId === user.id
+
+            return (
+              <tr key={user.id}>
+                <td>
+                  <Link className="name-link" to={`/users/${user.id}`}>
+                    {user.name}
+                  </Link>
+                </td>
+                <td>{user.email}</td>
+                <td>{user.phone}</td>
+                <td>
+                  {isDeleting ? (
+                    <span className="row-loader">Deleting...</span>
+                  ) : (
+                    <div className="action-group">
+                      <button
+                        className="btn btn-secondary"
+                        type="button"
+                        onClick={() => onEdit(user)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="btn btn-secondary"
+                        type="button"
+                        onClick={() => onDelete(user.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+
+      <div className="user-cards">
+        {users.map((user) => {
+          const isDeleting = deletingUserId === user.id
+
+          return (
+            <article className="user-card" key={user.id}>
+              <Link className="name-link" to={`/users/${user.id}`}>
+                {user.name}
+              </Link>
+              <p>{user.email}</p>
+              <p>{user.phone}</p>
+              {isDeleting ? (
+                <span className="row-loader">Deleting...</span>
+              ) : (
                 <div className="action-group">
                   <button
                     className="btn btn-secondary"
@@ -51,38 +96,10 @@ function UserTable({ users, onEdit, onDelete }: UserTableProps) {
                     Delete
                   </button>
                 </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <div className="user-cards">
-        {users.map((user) => (
-          <article className="user-card" key={user.id}>
-            <Link className="name-link" to={`/users/${user.id}`}>
-              {user.name}
-            </Link>
-            <p>{user.email}</p>
-            <p>{user.phone}</p>
-            <div className="action-group">
-              <button
-                className="btn btn-secondary"
-                type="button"
-                onClick={() => onEdit(user)}
-              >
-                Edit
-              </button>
-              <button
-                className="btn btn-secondary"
-                type="button"
-                onClick={() => onDelete(user.id)}
-              >
-                Delete
-              </button>
-            </div>
-          </article>
-        ))}
+              )}
+            </article>
+          )
+        })}
       </div>
     </>
   )

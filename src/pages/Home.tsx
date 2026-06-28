@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import {
-  createUser,
-  deleteUser,
+  createUser as createUserApi,
+  deleteUser as deleteUserApi,
   getUsers,
-  updateUser,
+  updateUser as updateUserApi,
 } from '../api/users'
 import Spinner from '../components/Spinner'
 import Toast from '../components/Toast'
@@ -13,11 +13,21 @@ import type { User, UserFormData } from '../types/User'
 
 type ToastState = { message: string; type: 'success' | 'error' }
 
+const emptyAddress = {
+  street: '',
+  suite: '',
+  city: '',
+  zipcode: '',
+}
+
+const emptyCompany = { name: '' }
+
 // Manages the user list and all CRUD interactions.
 function Home() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [deletingUserId, setDeletingUserId] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [toast, setToast] = useState<ToastState | null>(null)
   const [showForm, setShowForm] = useState(false)
@@ -59,22 +69,19 @@ function Home() {
   async function handleCreate(data: UserFormData) {
     try {
       setSubmitting(true)
-      const createdUser = await createUser(data)
-      setUsers((current) => [
-        {
-          ...createdUser,
-          id: createdUser.id || Date.now(),
-          address: createdUser.address ?? {
-            street: '',
-            suite: '',
-            city: '',
-            zipcode: '',
-          },
-          company: createdUser.company ?? { name: '' },
-          website: createdUser.website ?? '',
-        },
-        ...current,
-      ])
+
+      const createdUser = await createUserApi(data)
+      const idAlreadyExists = users.some((user) => user.id === createdUser.id)
+      const userToAdd: User = {
+        ...createdUser,
+        ...data,
+        id: idAlreadyExists ? Date.now() : createdUser.id,
+        address: createdUser.address ?? emptyAddress,
+        company: createdUser.company ?? emptyCompany,
+        website: createdUser.website ?? '',
+      }
+
+      setUsers([userToAdd, ...users])
       setShowForm(false)
       setToast({ message: 'User created successfully.', type: 'success' })
     } catch (err) {
@@ -92,21 +99,25 @@ function Home() {
 
     try {
       setSubmitting(true)
-      const updatedUser = await updateUser(editingUser.id, data)
-      setUsers((current) =>
-        current.map((user) =>
-          user.id === editingUser.id
-            ? {
-                ...user,
-                ...updatedUser,
-                id: editingUser.id,
-                address: updatedUser.address ?? user.address,
-                company: updatedUser.company ?? user.company,
-                website: updatedUser.website ?? user.website,
-              }
-            : user,
-        ),
-      )
+
+      const updatedUser = await updateUserApi(editingUser.id, data)
+      const updatedUsers = users.map((user) => {
+        if (user.id !== editingUser.id) {
+          return user
+        }
+
+        return {
+          ...user,
+          ...updatedUser,
+          ...data,
+          id: editingUser.id,
+          address: updatedUser.address ?? user.address,
+          company: updatedUser.company ?? user.company,
+          website: updatedUser.website ?? user.website,
+        }
+      })
+
+      setUsers(updatedUsers)
       setEditingUser(null)
       setToast({ message: 'User updated successfully.', type: 'success' })
     } catch (err) {
@@ -127,14 +138,16 @@ function Home() {
     }
 
     try {
-      setSubmitting(true)
-      await deleteUser(id)
-      setUsers((current) => current.filter((user) => user.id !== id))
+      setDeletingUserId(id)
+      await deleteUserApi(id)
+
+      const remainingUsers = users.filter((user) => user.id !== id)
+      setUsers(remainingUsers)
       setToast({ message: 'User deleted successfully.', type: 'success' })
     } catch (err) {
       setToast({ message: getErrorMessage(err), type: 'error' })
     } finally {
-      setSubmitting(false)
+      setDeletingUserId(null)
     }
   }
 
@@ -165,6 +178,7 @@ function Home() {
         <div>
           <h1>Users</h1>
           <p>Manage names, contact details, and profiles.</p>
+          {!loading && <span className="user-count">{users.length} users</span>}
         </div>
         <button
           className="btn btn-primary"
@@ -192,7 +206,12 @@ function Home() {
       {loading ? (
         <Spinner />
       ) : (
-        <UserTable users={users} onEdit={handleEdit} onDelete={handleDelete} />
+        <UserTable
+          users={users}
+          deletingUserId={deletingUserId}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
       )}
 
       {toast && (
